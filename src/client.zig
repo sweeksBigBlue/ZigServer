@@ -11,7 +11,22 @@ pub fn client(address: []const u8, port: u16) !void {
 }
 
 pub fn server(port: u16) !void {
-    _ = port;
+    const loopback = try std.net.Ip4Address.parse("127.0.0.1", port);
+    const localhost = std.net.Address{ .in = loopback };
+    var srv = try localhost.listen(.{
+        .reuse_port = true,
+    });
+    defer srv.deinit();
+
+    var conn = try srv.accept();
+    defer conn.stream.close();
+
+    std.debug.print("Connection received! {} is sending data.\n", .{conn.address});
+
+    var buff : [1024] u8 = undefined;
+    const size = try conn.stream.reader().readAll(&buff);
+
+    std.debug.print("{} says {s}\n", .{conn.address, buff[0..size]});
 }
 
 pub fn main() !void {
