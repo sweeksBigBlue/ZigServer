@@ -1,11 +1,16 @@
 const std = @import("std");
 
-pub fn client(address: []const u8, port: u32) !void {
-    _ = address;
-    _ = port;
+pub fn client(address: []const u8, port: u16) !void {
+    const peer = try std.net.Address.parseIp4(address, port);
+    const stream = try std.net.tcpConnectToAddress(peer);
+    defer stream.close();
+
+    const data = "test message\n";
+    var writer = stream.writer();
+    _ = try writer.write(data);
 }
 
-pub fn server(port: u32) !void {
+pub fn server(port: u16) !void {
     _ = port;
 }
 
@@ -30,21 +35,13 @@ pub fn main() !void {
         try stdout.print("received type client\n", .{});
         const address = args.next() orelse ""; // TODO: validate IP address string
         const portStr = args.next() orelse "0";
-        const port = try std.fmt.parseInt(u32, portStr, 10);
-        if (port < 1 or port > 65535) {
-            std.log.err("Client: Port should be a number from 1 to 65535, got '{d}'\n", .{port});
-            return;
-        }
+        const port = try std.fmt.parseInt(u16, portStr, 10);
 
         try client(address, port);
     } else if (std.mem.eql(u8, srvtype, "server")) {
         try stdout.print("received type server\n", .{});
         const portStr = args.next() orelse "0";
-        const port = try std.fmt.parseInt(u32, portStr, 10);
-        if (port < 1 or port > 65535) {
-            std.log.err("Server: Port should be a number from 1 to 65535, got '{d}'\n", .{port});
-            return;
-        }
+        const port = try std.fmt.parseInt(u16, portStr, 10);
 
         try server(port);
     } else {
