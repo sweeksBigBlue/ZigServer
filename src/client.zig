@@ -4,6 +4,14 @@ const SrvArgs = struct {
     srvType: []const u8 = "",
     address: []const u8 = "",
     port: []const u8 = "",
+
+    pub fn isClient(self: SrvArgs) bool {
+        return std.mem.eql(u8, self.srvType, "client");
+    }
+
+    pub fn isServer(self: SrvArgs) bool {
+        return std.mem.eql(u8, self.srvType, "server");
+    }
 };
 
 pub fn client(address: []const u8, port: u16) !void {
@@ -63,12 +71,12 @@ pub fn main() !void {
     // <program name> server <serverPort>
     const srvArgs = argParser();
 
-    if (std.mem.eql(u8, srvArgs.srvType, "client")) {
+    if (srvArgs.isClient()) {
         try stdout.print("received type client\n", .{});
         const port = try std.fmt.parseInt(u16, srvArgs.port, 10);
 
         try client(srvArgs.address, port);
-    } else if (std.mem.eql(u8, srvArgs.srvType, "server")) {
+    } else if (srvArgs.isServer()) {
         try stdout.print("received type server\n", .{});
         const port = try std.fmt.parseInt(u16, srvArgs.port, 10);
 
