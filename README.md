@@ -5,3 +5,5 @@ This is a learning exercise for Zig creating a simple client/server setup. Will 
 Byron Marohn
 
 Stephen Weeks
+
+Curtis Anderson
